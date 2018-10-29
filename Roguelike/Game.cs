@@ -56,7 +56,7 @@ namespace Roguelike
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
             Player = new Player();
-            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight);
+            MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
             DungeonMap.UpdatePlayerFieldOfView();
 
