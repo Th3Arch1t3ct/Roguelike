@@ -14,9 +14,12 @@ namespace Roguelike.Core
     {
         public List<Rectangle> Rooms;
 
+        private readonly List<Monster> _monsters;
+
         public DungeonMap()
         {
            Rooms = new List<Rectangle>();
+            _monsters = new List<Monster>();
         }
         // This method will be called any time we move the player to update field-of-view
         public void UpdatePlayerFieldOfView()
@@ -73,6 +76,11 @@ namespace Roguelike.Core
             {
                 SetConsoleSymbolForCell(mapConsole, cell);
             }
+
+            foreach(Monster monster in _monsters)
+            {
+                monster.Draw(mapConsole, this);
+            }
         }
 
         private void SetConsoleSymbolForCell(RLConsole console, Cell cell)
@@ -117,5 +125,46 @@ namespace Roguelike.Core
             SetIsWalkable(player.X, player.Y, false);
             UpdatePlayerFieldOfView();
         }
+
+        public void AddMonster(Monster monster)
+        {
+            _monsters.Add(monster);
+            // Make sure user cannot walk onto that cell occupied by the monster
+            SetIsWalkable(monster.X, monster.Y, false);
+        }
+
+        public Point GetRandomWalkableLocationInRoom(Rectangle room)
+        {
+            if (DoesRoomHaveWalkableSpace(room))
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    int x = Game.Random.Next(1, room.Width - 2) + room.X;
+                    int y = Game.Random.Next(1, room.Height - 2) + room.Y;
+                    if (IsWalkable(x, y))
+                    {
+                        return new Point(x, y);
+                    }
+                }
+            }
+            return new Point(-10000, -10000);
+        }
+
+        public bool DoesRoomHaveWalkableSpace(Rectangle Room)
+        {
+            for (int x = 1; x < Room.Width; x++)
+            {
+                for (int y = 1; y < Room.Height; y++)
+                {
+                    if(IsWalkable(x + Room.X, y + Room.Y))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        
     }
 }

@@ -38,6 +38,7 @@ namespace Roguelike
 
         private static bool _renderRequired = true;
         public static CommandSystem CommandSystem { get; private set; }
+        public static MessageLog MessageLog { get; set; }
 
         public static IRandom Random { get; private set; }
         
@@ -62,14 +63,11 @@ namespace Roguelike
 
             CommandSystem = new CommandSystem();
 
+            MessageLog = new MessageLog();
+            MessageLog.Add("The rogue arrives at level 1");
+            MessageLog.Add($"Dungeon generated with seed: {seed}");
 
             // Only Run This Block Once... For now
-            _messageConsole.SetBackColor(0, 0, _messageWidth, _messageHeight, Swatch.DbDeepWater);
-            _messageConsole.Print(1, 1, "Messages", Colors.TextHeading);
-
-            _statConsole.SetBackColor(0, 0, _statWidth, _statHeight, Swatch.DbOldStone);
-            _statConsole.Print(1, 1, "Stats", Colors.TextHeading);
-
             _inventoryConsole.SetBackColor(0, 0, _inventoryWidth, _inventoryHeight, Swatch.DbWood);
             _inventoryConsole.Print(1, 1, "Inventory", Colors.TextHeading);
 
@@ -120,8 +118,10 @@ namespace Roguelike
         {
             if (_renderRequired)
             {
+                MessageLog.Draw(_messageConsole);
                 DungeonMap.Draw(_mapConsole);
                 Player.Draw(_mapConsole, DungeonMap);
+                Player.DrawStats(_statConsole);
 
                 RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
                 RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
