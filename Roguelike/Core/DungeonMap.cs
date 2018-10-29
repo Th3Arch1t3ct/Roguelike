@@ -110,5 +110,12 @@ namespace Roguelike.Core
                 }
             }
         }
+
+        public void AddPlayer(Player player)
+        {
+            Game.Player = player;
+            SetIsWalkable(player.X, player.Y, false);
+            UpdatePlayerFieldOfView();
+        }
     }
 }

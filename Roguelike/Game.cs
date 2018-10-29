@@ -33,7 +33,7 @@ namespace Roguelike
         private static readonly int _inventoryHeight = 11;
         private static RLConsole _inventoryConsole;
 
-        public static Player Player { get; private set; }
+        public static Player Player { get; set; }
         public static DungeonMap DungeonMap { get; private set; }
 
         private static bool _renderRequired = true;
@@ -55,7 +55,7 @@ namespace Roguelike
             _statConsole = new RLConsole(_statWidth, _statHeight);
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
-            Player = new Player();
+            //Player = new Player();
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
             DungeonMap.UpdatePlayerFieldOfView();

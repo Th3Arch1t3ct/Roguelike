@@ -48,11 +48,34 @@ namespace Roguelike.Systems
                     _map.Rooms.Add(newRoom);
                 }
 
-                foreach(Rectangle room in _map.Rooms)
+                
+            }
+
+            for(int r = 1; r < _map.Rooms.Count; r++)
+            {
+                int previousRoomCenterX = _map.Rooms[r-1].Center.X;
+                int previousRoomCenterY = _map.Rooms[r-1].Center.Y;
+                int currentRoomCenterX = _map.Rooms[r].Center.X;
+                int currentRoomCenterY = _map.Rooms[r].Center.Y;
+
+                if(Game.Random.Next(1,2) == 1)
                 {
-                    CreateRoom(room);
+                    CreateHorizontalTunnel(previousRoomCenterX, currentRoomCenterX, previousRoomCenterY);
+                    CreateVerticalTunnel(previousRoomCenterY, currentRoomCenterY, previousRoomCenterX);
+                }
+                 else
+                {
+                    CreateVerticalTunnel(previousRoomCenterY, currentRoomCenterY, previousRoomCenterX);
+                    CreateHorizontalTunnel(previousRoomCenterX, currentRoomCenterX, previousRoomCenterY);
                 }
             }
+
+            foreach (Rectangle room in _map.Rooms)
+            {
+                CreateRoom(room);
+            }
+
+            PlacePlayer();
 
             return _map;
         }
@@ -65,6 +88,36 @@ namespace Roguelike.Systems
                 {
                     _map.SetCellProperties(x, y, true, true, true);
                 }
+            }
+        }
+
+        private void PlacePlayer()
+        {
+            Player player = Game.Player;
+            if (player == null)
+            {
+                player = new Player();
+            }
+
+            player.X = _map.Rooms[0].Center.X;
+            player.Y = _map.Rooms[0].Center.Y;
+
+            _map.AddPlayer(player);
+        }
+
+        private void CreateHorizontalTunnel(int xStart, int xEnd, int yPos)
+        {
+            for (int x = Math.Min(xStart, xEnd); x <= Math.Max(xStart, xEnd); x++)
+            {
+                _map.SetCellProperties(x, yPos, true,true);
+            }
+        }
+
+        private void CreateVerticalTunnel(int yStart, int yEnd, int xPos)
+        {
+            for(int y =Math.Min(yStart, yEnd); y <= Math.Max(yStart, yEnd); y++)
+            {
+                _map.SetCellProperties(xPos, y, true, true);
             }
         }
     }
