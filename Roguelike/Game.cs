@@ -41,6 +41,8 @@ namespace Roguelike
         public static MessageLog MessageLog { get; set; }
 
         public static IRandom Random { get; private set; }
+
+        public static SchedulingSystem SchedulingSystem { get; private set; }
         
         static void Main(string[] args)
         {
@@ -56,12 +58,15 @@ namespace Roguelike
             _statConsole = new RLConsole(_statWidth, _statHeight);
             _inventoryConsole = new RLConsole(_inventoryWidth, _inventoryHeight);
 
+            SchedulingSystem = new SchedulingSystem();
+
             //Player = new Player();
             MapGenerator mapGenerator = new MapGenerator(_mapWidth, _mapHeight, 20, 13, 7);
             DungeonMap = mapGenerator.CreateMap();
             DungeonMap.UpdatePlayerFieldOfView();
 
             CommandSystem = new CommandSystem();
+            
 
             MessageLog = new MessageLog();
             MessageLog.Add("The rogue arrives at level 1");
@@ -82,34 +87,43 @@ namespace Roguelike
             bool didPlayerAct = false;
             RLKeyPress keyPress = _rootConsole.Keyboard.GetKeyPress();
 
-            if(keyPress != null)
+            if (CommandSystem.IsPlayerTurn)
             {
-                if (keyPress.Key == RLKey.Up)
+                if (keyPress != null)
                 {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
-                }
-                else if (keyPress.Key == RLKey.Down)
-                {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+                    if (keyPress.Key == RLKey.Up)
+                    {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Up);
+                    }
+                    else if (keyPress.Key == RLKey.Down)
+                    {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Down);
+                    }
+
+                    else if (keyPress.Key == RLKey.Left)
+                    {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
+                    }
+                    else if (keyPress.Key == RLKey.Right)
+                    {
+                        didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
+                    }
+
+                    else if (keyPress.Key == RLKey.Escape)
+                    {
+                        _rootConsole.Close();
+                    }
                 }
 
-                else if (keyPress.Key == RLKey.Left)
+                if (didPlayerAct)
                 {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Left);
-                }
-                else if (keyPress.Key == RLKey.Right)
-                {
-                    didPlayerAct = CommandSystem.MovePlayer(Direction.Right);
-                }
-
-                else if (keyPress.Key == RLKey.Escape)
-                {
-                    _rootConsole.Close();
+                    _renderRequired = true;
+                    CommandSystem.EndPlayerTurn();
                 }
             }
-
-            if (didPlayerAct)
+            else
             {
+                CommandSystem.ActivateMonsters();
                 _renderRequired = true;
             }
         }
@@ -118,8 +132,12 @@ namespace Roguelike
         {
             if (_renderRequired)
             {
+                _mapConsole.Clear();
+                _statConsole.Clear();
+                _messageConsole.Clear();
+
                 MessageLog.Draw(_messageConsole);
-                DungeonMap.Draw(_mapConsole);
+                DungeonMap.Draw(_mapConsole, _statConsole);
                 Player.Draw(_mapConsole, DungeonMap);
                 Player.DrawStats(_statConsole);
 

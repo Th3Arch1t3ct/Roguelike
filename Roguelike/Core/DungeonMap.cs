@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RLNET;
 using RogueSharp;
 
+
 namespace Roguelike.Core
 {
     // Our custom DungeonMap class extends the base RogueSharp Map class
@@ -69,7 +70,7 @@ namespace Roguelike.Core
 
         // The Draw method will be called each time the map is updated
         // It will render all of the symbols/colors for each cell to the map sub console
-        public void Draw(RLConsole mapConsole)
+        public void Draw(RLConsole mapConsole, RLConsole statConsole)
         {
             mapConsole.Clear();
             foreach (Cell cell in GetAllCells())
@@ -77,9 +78,17 @@ namespace Roguelike.Core
                 SetConsoleSymbolForCell(mapConsole, cell);
             }
 
+            int i = 0;
+
             foreach(Monster monster in _monsters)
             {
-                monster.Draw(mapConsole, this);
+                if (IsInFov(monster.X, monster.Y))
+                {
+                    monster.Draw(mapConsole, this);
+
+                    monster.DrawStats(statConsole, i);
+                    i++;
+                }
             }
         }
 
@@ -124,6 +133,8 @@ namespace Roguelike.Core
             Game.Player = player;
             SetIsWalkable(player.X, player.Y, false);
             UpdatePlayerFieldOfView();
+
+            Game.SchedulingSystem.Add(player);
         }
 
         public void AddMonster(Monster monster)
@@ -131,6 +142,8 @@ namespace Roguelike.Core
             _monsters.Add(monster);
             // Make sure user cannot walk onto that cell occupied by the monster
             SetIsWalkable(monster.X, monster.Y, false);
+
+            Game.SchedulingSystem.Add(monster);
         }
 
         public Point GetRandomWalkableLocationInRoom(Rectangle room)
@@ -165,6 +178,18 @@ namespace Roguelike.Core
             return false;
         }
 
-        
+        public void RemoveMonster(Monster monster)
+        {
+            _monsters.Remove(monster);
+
+            SetIsWalkable(monster.X, monster.Y, true);
+
+            Game.SchedulingSystem.Remove(monster);
+        }
+
+        public Monster GetMonsterAt(int x, int y)
+        {
+            return _monsters.FirstOrDefault(m => m.X == x && m.Y == y);
+        }
     }
 }

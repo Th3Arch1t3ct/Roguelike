@@ -10,7 +10,7 @@ using RLNET;
 
 namespace Roguelike.Core
 {
-    public class Actor : IActor, IDrawable
+    public class Actor : IActor, IDrawable, IScheduleable
     {
         /*public string Name { get; set; }
         public int Awareness { get; set; }*/
@@ -155,6 +155,14 @@ namespace Roguelike.Core
             else
             {
                 console.Set(X, Y, Colors.Floor, Colors.FloorBackground, '.');
+            }
+        }
+
+        public int Time
+        {
+            get
+            {
+                return Speed;
             }
         }
     }
